@@ -1,0 +1,9 @@
+Metrics,det_hier.sol,det_GMM.sol,det_GMMCapitals.sol,det_GMMBridges.sol
+Shipment cost,3615164,1392473,1100306,1733594
+Shortage cost,0,454218240,607583692,0
+Production cost,2011000,1161000,874000,2011000
+Total cost,5626164,456771713,609557998,3744594
+Total Production,10055.0,5805.0,4370.0,10055.0
+Total shipments,623,507,364,629
+Total travelling time,13798.337,5314.785,4199.644,6616.775
+Total Shortage,0.0,4250.0,5685.0,0.0
