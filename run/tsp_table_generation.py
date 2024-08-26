@@ -80,4 +80,4 @@ df_results['TSP_routes'] = list(TSP_routes.values())
 df_results['TSP_distance'] = list(TSP_distance.values())
 df_results['TSP_running_time'] = list(TSP_running_time.values())
 
-df_results.to_csv('/Users/nicol/Documents/Universidad de Los Andes /2022-20/IIND3221 - Logística/Proyecto final/df_routes.csv')
+df_results.to_csv(os.path.join(cwd, 'results', 'df_routes.csv'))

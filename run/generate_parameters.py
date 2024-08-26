@@ -95,7 +95,7 @@ def joinRegions(R1: list, Mr: dict, R2: list):
         for i in listMunip:
             for r in R1prima:
                 for j in Mr[r]:
-                    time = round(float(data.loc[i, [str(j)]]), 4)
+                    time = round((data.loc[i, [str(j)]]), 4)
                     if time < lessDistance:
                         lessDistance = time
                         start = i
@@ -365,7 +365,7 @@ def generateClustersGMMCapitals(M: list, BICGraph: bool = False, RegionsGraph: b
             for j in M:
                 if (i, j) not in connections.keys():
                     connections[(i, j)] = False
-        return G, connections
+        return G, connections, Mr, R
     else:
         unconnectedMunip = M.copy()
         unconnectedReg = list()
@@ -450,7 +450,9 @@ def write_mu_I0(M:list, T: list, filename: str):
 
     for t in T:
         for m in M:
-            muTemp = round(float(data.loc[m, [str(t)]]), 4)
+            value = data.loc[m, [str(t)]]
+            test = value.loc[m]
+            muTemp = np.round(value.loc[m], 4)
             file.write(f'\t({t},{m})={muTemp}//\n')
 
 
@@ -459,8 +461,8 @@ def write_mu_I0(M:list, T: list, filename: str):
     file.write('\nI0:={\n')
 
     for m in M:
-        if round(float(data.loc[m, ['1']]), 4) > 0:
-            I0Temp = round(float(data.loc[m, ['1']]), 4)*delta
+        if round((data.loc[m, ['1']]), 4) > 0:
+            I0Temp = round((data.loc[m, ['1']]), 4)*delta
         else:
             I0Temp = delta
         file.write(f'\t({m})={I0Temp}//\n')
@@ -528,7 +530,9 @@ list_degree = [10, 16, 20, 26, 30]
 
 
 G_hier, connections_hier, Mr_hier, R_hier = generateClustersHierarchical(M)
-nx.write_gpickle(G_hier, os.path.join(cwd, 'parameters', 'hier.gpickle'))
+with open (os.path.join(cwd, 'parameters', 'hier.gpickle'), 'wb') as f:
+    pickle.dump(G_hier, f, pickle.HIGHEST_PROTOCOL)
+f.close()
 write_h(connections_hier, 'h_hier.txt')
 write_mu_I0(M, T, 'mu_I0_hier.txt')
 write_M_q_T(M, connections_hier, T, 'q_T_hier.txt')
@@ -537,7 +541,9 @@ print(f'Parámetros para redes jerárquicas creados!')
 
 
 G_GMM, connections_GMM, Mr_GMM, R_GMM = generateClustersGMM(M)
-nx.write_gpickle(G_GMM, os.path.join(cwd, 'parameters', 'GMM.gpickle'))
+with open (os.path.join(cwd, 'parameters', 'GMM.gpickle'), 'wb') as f:
+    pickle.dump(G_GMM, f, pickle.HIGHEST_PROTOCOL)
+f.close()
 write_h(connections_GMM, 'h_GMM.txt')
 write_mu_I0(M, T, 'mu_I0_GMM.txt')
 write_M_q_T(M, connections_GMM, T, 'q_T_GMM.txt')
@@ -553,7 +559,8 @@ file_ClustersGMM.close()
 ##
 
 G_GMMCapitals, connections_GMMCapitals, Mr_GMMCapitals, R_GMMCapitals = generateClustersGMMCapitals(M, False, False)
-nx.write_gpickle(G_GMMCapitals, os.path.join(cwd, 'parameters', 'GMMCapitals.gpickle'))
+with open (os.path.join(cwd, 'parameters', 'GMMCapitals.gpickle'), 'wb') as f:
+    pickle.dump(G_GMMCapitals, f, pickle.HIGHEST_PROTOCOL)
 write_h(connections_GMMCapitals, 'h_GMMCapitals.txt')
 write_mu_I0(M, T, 'mu_I0_GMMCapitals.txt')
 write_M_q_T(M, connections_GMMCapitals, T, 'q_T_GMMCapitals.txt')
@@ -562,7 +569,8 @@ print(f'Parámetros para redes GMM con capitales creados!')
 
 
 G_GMMBridges, connections_GMMBridges, Mr_GMMBridges, R_GMMBridges = generateClustersGMMBridges(M, False, False)
-nx.write_gpickle(G_GMMBridges, os.path.join(cwd, 'parameters', 'GMMBridges.gpickle'))
+with open (os.path.join(cwd, 'parameters', 'GMMBridges.gpickle'), 'wb') as f:
+    pickle.dump(G_GMMBridges, f, pickle.HIGHEST_PROTOCOL)
 write_h(connections_GMMBridges, 'h_GMMBridges.txt')
 write_mu_I0(M, T, 'mu_I0_GMMBridges.txt')
 write_M_q_T(M, connections_GMMBridges, T, 'q_T_GMMBridges.txt')
@@ -578,14 +586,15 @@ list_Graphs = [f'randD{i}' for i in list_degree]
 list_Graphs += ['hier', 'GMM', 'GMMCapitals', 'GMMBridges']
 
 for G_name in list_Graphs:
-    G_temp = nx.read_gpickle(os.path.join(cwd,'parameters',f'{G_name}.gpickle'))
+    with open (os.path.join(cwd,'parameters',f'{G_name}.gpickle'), 'rb') as f:
+        G_temp = pickle.load(f)
     tableGraphs.add_row([G_name, G_temp.size(), np.round(average_degree(G_temp), 3),
                          nx.diameter(G_temp), nx.radius(G_temp), nx.number_connected_components(G_temp)])
 
 print(tableGraphs)
 
 ##
-dfColor = pd.read_csv('ColoresDepartamento.csv', sep=';')
+dfColor = pd.read_csv(os.path.join(cwd, 'parameters','ColoresDepartamento.csv'), sep=';')
 
 colorMapHier = []
 colorMapGMM = []
@@ -607,7 +616,8 @@ for node in G_hier:
 
     colorMapHier.append(f'#{colorTemp}')
 
-G_hier = nx.read_gpickle(os.path.join(cwd, 'parameters', 'hier.gpickle'))
+with open (os.path.join(cwd, 'parameters', 'hier.gpickle'), 'rb') as f:
+    G_hier = pickle.load(f)
 
 colorMapGMM = []
 for node in G_GMM:
@@ -638,7 +648,7 @@ for node in G_GMMBridges:
 
 
 sizeMap = [100]*len(dataCoordinates.index)
-
+'''
 plt.figure(figsize=(5,7))
 ax = plt.gca()
 ax.set_title('Clusters Jerárquicos', fontweight='bold')
@@ -651,7 +661,7 @@ ax = plt.gca()
 ax.set_title('Clusters GMM', fontweight='bold')
 nx.draw(G_GMM, pos=dictPositions, node_color=colorMapGMM, node_size=sizeMap, ax=ax)
 ax.axis('off')
-plt.show()
+plt.show()'''
 #
 # plt.figure(figsize=(5,7))
 # ax = plt.gca()

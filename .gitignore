@@ -1,1 +1,5 @@
 /lp_models
+.DS_Store
+plots/.DS_Store
+results/.DS_Store
+parameters/.DS_Store
